@@ -1,3 +1,8 @@
+;Colby Wirth
+;7 April 2025
+;COS 255 PRELAB 3
+
+
 section .data
     upper dd 100
     result dd 0
@@ -14,6 +19,26 @@ _start:
     ; you need to to complete the if-control flow and the looping logic here.....
     ; store your calculation result to the variable label: 'result'
     ; your last instruction should be 'jmp done' --> jump to label 'done'
+    xor eax, eax
+    xor ebx, ebx
+    xor ecx, ecx,
+
+    mov ecx, [upper] ; we iterate ecx backwards from 100 to 0
+    mov ebx, 2
+
+do_loop:
+    mov eax, ecx ; on each iteration move ecx into eax
+    xor edx, edx
+    div ebx
+    cmp edx, 0
+    je add_to_sum
+    LOOP do_loop
+    jmp done ; done handles the print statements
+
+add_to_sum:
+    ADD [result], ecx
+    LOOP do_loop
+
 
 
 

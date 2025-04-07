@@ -1,12 +1,10 @@
 section .data
     message db 'Hello, World!', 0DH, 0AH, 0  ; Message to print with CR LF and null terminator
     messageLen equ $ - message               ; Calculate the length of the message
-    charsWritten db 1                      ; space for the pointer to the length of the written message  
-
+    charsWritten resd 1                      ; space for the number of written characters  
 
 section .bss
     stdHandle resd 1                         ; space for the standard output handle
-    
 
 section .text
     extern _GetStdHandle@4, _WriteConsoleA@20, _ExitProcess@4
@@ -20,10 +18,10 @@ _start:
 
     ; Write the message to standard output
     push 0                        ; Placeholder for number of bytes written
-    push charsWritten
+    push charsWritten             ; Address of the variable for the number of bytes written
     push messageLen               ; Length of the message
     push message                  ; Pointer to the message
-    push dword [stdHandle]           ; Standard output handle
+    push dword [stdHandle]        ; Standard output handle
     call _WriteConsoleA@20
 
     ; Exit the process
