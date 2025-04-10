@@ -26,10 +26,10 @@ section .data
 section .bss
     stdHandle resd 1
     chars_read resd 1
-    user_input_buf resb 2 ;1 byte buffer for 1 char + null terminator
+    user_input_buf resb 4
     operand1 resd 1
     operand2 resd 1
-    result_buf resb 4 ; stores operand1 +/- operand 2
+    result_buf resb 5 
 
 section .text ;APIs
     extern _GetStdHandle@4, _WriteConsoleA@20, _ReadConsoleA@20, _ExitProcess@4
@@ -68,8 +68,8 @@ loop_start:
     cmp eax, '3'
     je exit_process
     
-    cmp eax, '1'
-    setne [subtraction_flag] ; set the subtraction flag if 1
+    cmp eax, '2'
+    setne [subtraction_flag] ; sets subtraction flag
     xor eax, eax
 
     ;;; next, get operands 1 and 2 ;;;
@@ -130,7 +130,7 @@ loop_start:
     mov ebx, [operand2]
 
     ;get operation type
-    cmp byte [subtraction_flag], 1
+    cmp byte [subtraction_flag], 0
     je subtraction_block
 
     addition_block:
@@ -141,13 +141,36 @@ loop_start:
     SUB eax, ebx
 
     convert_to_ASCII:
-    ADD eax, '0'
-    mov [user_input_buf], al
-    mov byte [user_input_buf+1], 0
+
+    cmp eax, 0
+    jl convert_to_negative_str
+    jmp convert_to_positive_str
+
+        convert_to_positive_str:
+        cmp eax, 10
+        jl print_val
+        ;;;; convert vals > 10 here logic here ;;;;
+        ADD eax, '0'
+
+         convert_to_negative_str:
+         cmp eax, -10
+         jl convert_two_neg_digits
+         ;;; convert negative vals > -10 here ;;;;
+
+         convert_two_neg_digits:
+        ;;; convert vals < -10 here ;;;
+
+    print_val:
+        ADD eax, '0'
+        mov [result_buf], al
+        mov byte [result_buf+1], 10
+        xor ecx, ecx
 
 
 
-    ;get handle to write output
+
+
+    write_output:
     push -11
     call _GetStdHandle@4
     mov [stdHandle], eax
@@ -162,10 +185,9 @@ loop_start:
     push -11
     call _GetStdHandle@4
     mov [stdHandle], eax
-
     push 0
-    push 1
-    push user_input_buf
+    push 2
+    push result_buf
     push dword [stdHandle]
     call _WriteConsoleA@20
 
