@@ -29,7 +29,7 @@ section .bss
     user_input_buf resb 2 ;1 byte buffer for 1 char + null terminator
     operand1 resd 1
     operand2 resd 1
-    result_buf resb 4 ; stores operand1 +/- operand 2
+
 
 section .text ;APIs
     extern _GetStdHandle@4, _WriteConsoleA@20, _ReadConsoleA@20, _ExitProcess@4
@@ -51,18 +51,17 @@ loop_start:
     push dword [stdHandle]
     call _WriteConsoleA@20
 
-    ;get input handle for user decision
+    ;get input handle for userdecision
     push -10
     call _GetStdHandle@4
-    
     mov [stdHandle], eax
     push chars_read
-    push 8 ; 8 bits
+    push 2
     push user_input_buf
     push dword [stdHandle]
     call _ReadConsoleA@20
 
-    movzx eax, byte [user_input_buf]
+    movzx eax, byte [user_input_buf] ;;ISSUE HERE?
 
     ;make option based on 1,2,3
     cmp eax, '3'
@@ -78,96 +77,66 @@ loop_start:
     push -11
     call _GetStdHandle@4
     mov [stdHandle], eax
-
     push 0
-    push askFirstOp_len
     push askFirstOp
+    push askFirstOp_len
     push dword [stdHandle]
     call _WriteConsoleA@20
 
-    ;get input for operand1
+
+    ;get input handle for operand1
     push -10
     call _GetStdHandle@4
-    mov [stdHandle], eax
+    movzx eax, byte [user_input_buf]
     push chars_read
     push 8
-    push user_input_buf
+    push operand1
     push dword [stdHandle]
     call _ReadConsoleA@20
-
-    movzx eax, byte [user_input_buf]
-    sub eax, '0' ; convert to int
-    mov [operand1], eax
-
-    ;prompt user for operand 2
-    push -11
-    call _GetStdHandle@4
-    mov [stdHandle], eax
-    push 0
-    push askSecondOp_len
-    push askSecondOp
-    push dword [stdHandle]
-    call _WriteConsoleA@20
-
-    ;get input handle for operand2
-    push -10
-    call _GetStdHandle@4
-    mov [stdHandle], eax
-    push chars_read
-    push 8
-    push user_input_buf
-    push dword [stdHandle]
-    call _ReadConsoleA@20
-    
-    movzx eax, byte [user_input_buf]
-    sub eax, '0' ; convert to int
-    mov [operand2], eax
 
     xor eax, eax
-
-    ; load operands to registers
     mov eax, [operand1]
-    mov ebx, [operand2]
+    sub eax, '0'
 
-    ;get operation type
-    cmp byte [subtraction_flag], 1
-    je subtraction_block
+    ; ;get input handle for operand2
+    ; push -10
+    ; call _GetStdHandle@4
+    ; mov [stdHandle], eax
+    ; push chars_read
+    ; push 8
+    ; push user_input_buf
+    ; push dword [stdHandle]
+    ; call _ReadConsoleA@20  
+ 
+    ; xor ebx, ebx
+    ; movzx ebx, byte [user_input_buf]
+    ; sub ebx, '0'
 
-    addition_block:
-    ADD eax, ebx
-    jmp convert_to_ASCII
+    ; ;get operation type
+    ; cmp byte [subtraction_flag], 1
+    ; je subtraction_block
 
-    subtraction_block:
-    SUB eax, ebx
+    ; addition_block:
+    ; ADD eax, ebx
 
-    convert_to_ASCII:
-    ADD eax, '0'
-    mov [user_input_buf], al
-    mov byte [user_input_buf+1], 0
+    ; subtraction_block:
+    ; SUB eax, ebx
 
+    ; ADD eax, '0'
 
+    ; add eax, [user_input_buf]
 
-    ;get handle to write output
-    push -11
-    call _GetStdHandle@4
-    mov [stdHandle], eax
+    ; ;get handle for output of operation
+    ; push -11
+    ; call _GetStdHandle@4
+    ; mov [stdHandle], eax
 
-    push 0
-    push calcPrompt_len
-    push calcPrompt
-    push dword [stdHandle]
-    call _WriteConsoleA@20
-
-    ;get handle to write result
-    push -11
-    call _GetStdHandle@4
-    mov [stdHandle], eax
-
-    push 0
-    push 1
-    push user_input_buf
-    push dword [stdHandle]
-    call _WriteConsoleA@20
+    ; ;print sum
+    ; push 0
+    ; push 1
+    ; push user_input_buf
+    ; push dword [stdHandle]
+    ; call _WriteConsoleA@20
 
 
 
