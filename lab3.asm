@@ -142,29 +142,93 @@ loop_start:
 
     convert_to_ASCII:
 
-    cmp eax, 0
-    jl convert_to_negative_str
-    jmp convert_to_positive_str
+        xor ecx, ecx ;ecx used for loop
+        mov ebx, 10 ; dividing by 10 to get next digit in loop
+        mov esi, result_buf ; stores the result
 
-        convert_to_positive_str:
-        cmp eax, 10
-        jl print_val
+        cmp eax, 9
+        jg convert__two_digit_loop ; two digit positive numbers
+
+        cmp eax, -1 
+        jg convert_single_digit ; single digit positive numbers
+
+        cmp eax, -9 
+        jl convert_large_neg ; two digit negative numbers
+
+        ;else this has to be a single digit negative number
+            mov byte [result_buf], '-'
+            inc esi
+            inc ecx
+            neg eax
+            jmp convert_single_digit
+
+
+    convert_large_neg:
+    mov byte [result_buf], '-'
+    inc esi
+    inc ecx
+    neg eax
+    jmp convert__two_digit_loop
+
+
+    convert_single_digit:
+        add eax, '0'
+        mov [result_buf+esi], al
+        inc ecx
+        jmp done
+
+
+    convert__two_digit_loop:
+        xor edx, edx
+        div ebx ; divide EAX by 10
+        add edx, '0'
+        push edx
+        inc ecx
+        test eax, eax ; check quotient
+        jnz convert__two_digit_loop
+
+        mov esi, 0
+    reverse_elements_loop:
+        pop edx
+        mov [result_buf+esi], edx
+        inc esi
+        loop reverse_elements_loop
+
+
+    done:
+
+        ; movzx edx, byte [eax+ecx]
+        ; cmp edx, '
+        ; jl done
+        ; cmp edx, '9'
+
+
+
+
+       ; cmp eax, 0
+       ; jl convert_to_negative_str
+        ;jg
+        ;jmp convert_to_positive_str
+
+       ; convert_to_positive_str:
+      ;  cmp eax, 10
+     ;   jl print_val
         ;;;; convert vals > 10 here logic here ;;;;
-        ADD eax, '0'
+    ;    ADD eax, '0'
 
-         convert_to_negative_str:
-         cmp eax, -10
-         jl convert_two_neg_digits
+   ;      convert_to_negative_str:
+  ;       cmp eax, -10
+ ;        jl convert_two_neg_digits
          ;;; convert negative vals > -10 here ;;;;
 
-         convert_two_neg_digits:
+;         convert_two_neg_digits:
         ;;; convert vals < -10 here ;;;
 
-    print_val:
-        ADD eax, '0'
-        mov [result_buf], al
-        mov byte [result_buf+1], 10
-        xor ecx, ecx
+    ;print_val:
+   ;     ADD eax, '0'
+  ;      mov [result_buf], al
+ ;       mov byte [result_buf+1], 10
+;        xor ecx, ecx
 
 
 
