@@ -1,3 +1,7 @@
+; Author  : Colby Wirth
+; Course  : COS 255
+; Lab 3   : Simple Calculator
+; Version : 21 April 2025
 section .data
     
     prompt1 db "What do you want to do? (1-Add, 2-Sub, 3-Exit)", 13,10
@@ -44,6 +48,10 @@ section .text ;APIs
 _start:
 
 loop_start:
+    xor eax, eax
+    mov byte [subtraction_flag], 0
+    mov byte [is_neg_flag], 0
+    xor [result_buf], eax
 
     ;get output handle
     push -11
@@ -165,47 +173,42 @@ loop_start:
     convert_loop:
     
         xor edx, edx
-        div ebx ; divide EAX by 10
-        add dl, '0'
-        mov [edi + esi], dl
-        inc esi
-        inc ecx
-        test eax, eax ; check quotient
+        div ebx ; divide EAX by 10 to get the next integer
+        add dl, '0' ;; convert to ascii
+        mov [edi + esi], dl ; store the ascii digit at offset 
+        inc esi ; increment the offset
+        inc ecx ;increment the digit count
+        test eax, eax ; check quotient ==0 ?
         jnz convert_loop
 
         ; deal with negative numbers
         cmp byte [is_neg_flag], 0
         je skip_neg
-        mov byte [edi + esi], '-' 
+        mov byte [edi + esi], '-' ; append with '-' for a negative string
         inc esi
         inc ecx
 
     skip_neg:
-        mov [output_size], ecx
+        mov [output_size], ecx ; output_size used for the _WriteConsole sys acll
 
-        ; utilizing eax and ebx track reversing while eax < ebx
-        mov eax, 0
-        mov ebx, ecx 
-        dec ebx                
-
-
+    xor eax, eax ; initialize eax and ebx as pointers to reverse outputs in the output string
+    mov ebx, ecx 
+    dec ebx                
     reverse_elements_loop:
 
         cmp eax, ebx ; check if eax and ebx have not passed eachother
         jge done
 
         ; swap elements
-        mov dl, [edi + eax]
-        mov dh, [edi + ebx]
-        mov [edi + eax], dh
-        mov [edi + ebx], dl
+        mov dl, [edi + eax] ; load left element into dl
+        xchg dl, [edi + ebx] ; exchange dl with right element
+        mov [edi + eax], dl ; store updated left element
 
         ;increment and decrement pointers
         inc eax
         dec ebx
         jmp reverse_elements_loop
 
-    
     done:
 
     write_output:
